@@ -1,37 +1,30 @@
 import random
-from escpos.printer import Usb
 
 def character_name():
+    if random.randint(0,50) == 0:
+        return "Patricia"
     return "Sam" 
     
 def character_title(biggest_stat):
     return " the "+biggest_stat
 
-def get_stats():
-    strength = random.randint(1,6) + random.randint(1,6) + random.randint(1,6)
-    dexterity = random.randint(1,6) + random.randint(1,6) + random.randint(1,6)
-    charisma = random.randint(1,6) + random.randint(1,6) + random.randint(1,6)
-    wisdom = random.randint(1,6) + random.randint(1,6) + random.randint(1,6)
-    intelligence = random.randint(1,6) + random.randint(1,6) + random.randint(1,6)
-    constitution = random.randint(1,6) + random.randint(1,6) + random.randint(1,6)
-    HP = int(constitution/3.0) + random.randint(1,4)
-    to_return = "STR:{0: >2}   WIS:{1: >2}\n".format(strength, wisdom)
-    to_return += "DEX:{0: >2}   INT:{1: >2}\n".format(dexterity, intelligence)
-    to_return += "CHA:{0: >2}   CON:{1: >2}\n".format(charisma, constitution)
-    to_return += "HP: {0: >2}\n".format(HP)
-    
-    return to_return #[strength, dexterity, charisma, wisdom, intelligence, constitution]
+
+def roll_3d6():
+    return random.randint(1,6) + random.randint(1,6) + random.randint(1,6)
+
+#    HP = int(constitution/3.0) + random.randint(1,4)
+
     
 def personality():
     options = ["sweet", "bitter", "dry", "moist", "bland", "saucy", "spicy", "hot",
      "salty", "greasy", "sour", "crunchy", "creamy", "minty", "tart", "zesty", "cheesy",
       "flakey", "nutty"]
-    return random.choice(options)
+    return random.choice(options).capitalize()
     
 def occupation():
-    options = ["farmer", "baker", "mason", "dancer", "jester", "cabbage seller", "weaver", "shepherd", 
-    "barkeep", "innkeeper", "floutist", "milk maid", "noble man", "lumberjack", "elf"]
-    return random.choice(options)
+    options = ["farmer", "baker", "mason", "dancer", "jester", "Cabbage Seller", "weaver", "shepherd", 
+    "barkeep", "innkeeper", "floutist", "Milk Maid", "noble", "lumberjack", "elf"]
+    return random.choice(options).capitalize()
     
 def lame_weapon():
     options = ["rolling pin", "sewing needle", "lantern", "pine branch", "rat on a string", 
@@ -45,42 +38,49 @@ def occupational_object():
     
 def random_object():
     return "jar with an eyeball"
-    
+
+def roll_objects():
+    return ["{} gold".format(starting_gold()), lame_weapon(), occupational_object(), random_object() ]
+
+def print_list( list_of_strings ):
+    str = ""
+    for i, line in enumerate(list_of_strings):
+        if i > 0: # don't put a comma on the first line
+            str += ", "
+        str += line
+    return str
+
 def starting_gold(total = 0):
     if random.randint(0, 9) == 0:
         return total
     else:
         return starting_gold(total +1) 
-        
-def printer_print(in_text):
-    try:
-        p = Usb(0x0416, 0x5011) #, 0, profile="TM-T88III")
-        p.text(in_text)
-        p.text("\n")
-    except:
-        print("Connection to printer failed. \n")
-        print(in_text)
-        print("\n")
-    
-def print_header():
-    try:
-        printer_print(" MEATGRINDER! MEATGRINDER! ")
-    except:
-        print("Connection to printer failed.")
 
-                                                                 
+def center_format(str, pad_character = " ", width = 32):
+    if len(str) >= width:
+        return str
     
+    left_pad_amount = int ((width - len(str)) / 2)
+    right_pad_ammount = int(width - len(str) - left_pad_amount)
+    
+    return pad_character*left_pad_amount + str + pad_character*right_pad_ammount
+
+
+def header():
+    return "~ MEATGRINDER! MEATGRINDER! ~"
+
 def print_character():
-    print_header()
-    to_print = (character_name())
-    to_print += ('\n'+personality())
-    to_print += ('\n'+occupation())
-    to_print += ('\n'+"Gold: {0}".format(starting_gold()))
-    to_print += ('\n'+lame_weapon())
-    to_print += ('\n'+occupational_object())
-    to_print += ('\n'+random_object())
-    to_print += ('\n'+get_stats())
-    to_print += ("\n\n\n")
-    printer_print(to_print)
+    to_print = ""
+#    to_print +=  "{}\n".format( header() )
+#    to_print += '\n'
+    to_print += center_format("{} the {} {}".format( character_name(), personality(), occupation() )) + '\n'
+    to_print += "================================\n"
+    to_print += "STR:{0: >2}   WIS:{1: >2}\n".format( roll_3d6(), roll_3d6() )
+    to_print += "DEX:{0: >2}   INT:{1: >2}\n".format( roll_3d6(), roll_3d6() )
+    to_print += "CHA:{0: >2}   CON:{1: >2}\n".format( roll_3d6(), roll_3d6() )
+    to_print += "\n"
+    to_print += "{}\n".format(print_list( roll_objects() ))
+    ## to_print += ("\n\n\n") # Trailing newlines moved to print_receipt.py
+    print(to_print)
     
 print_character()
