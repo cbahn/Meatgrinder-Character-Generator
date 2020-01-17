@@ -1,5 +1,31 @@
 import random
 
+#initialize item lists
+
+good = open('good.txt').read().splitlines()
+bad = open('bad.txt').read().splitlines()
+weird = open('weird.txt').read().splitlines()
+
+random.shuffle(good)
+random.shuffle(bad)
+random.shuffle(weird)
+
+# pop an item off the list. If the list is empty, return a default item.
+def pull( item_list, default_item = "stick" ):
+    if len(item_list) == 0:
+        return default_item
+    return item_list.pop(0)
+
+# return a random item. gp, bp, and wp are the relative odds of pulling from good, bad, or weird lists.
+def roll_item(gp, bp, wp):
+  roll = random.randint(0,gp+bp+wp)
+  if roll < gp:
+    return pull(good)
+  roll -= gp
+  if roll < bp:
+    return pull(bad)
+  return pull(weird)
+
 def character_name():
     if random.randint(0,50) == 0:
         return "Patricia"
@@ -40,7 +66,16 @@ def random_object():
     return "jar with an eyeball"
 
 def roll_objects():
-    return ["{} gold".format(starting_gold()), lame_weapon(), occupational_object(), random_object() ]
+    my_items = [
+        roll_item(94,5,1),
+        roll_item(45,50,5),
+        roll_item(21,45,34)
+        ]
+    
+    random.shuffle(my_items)
+    my_items.insert(0, "{} gold".format(starting_gold()) )
+    
+    return my_items
 
 def print_list( list_of_strings ):
     str = ""
@@ -70,16 +105,25 @@ def header():
     return "~ MEATGRINDER! MEATGRINDER! ~"
 
 def print_character():
+
+    stats = {}
+    stat_types = ["str","dex","cha","wis","int","con"]
+    for stat in stat_types:
+        stats[stat] = roll_3d6()
+
+    hp = int( (stats["con"] - 3 + random.randint(0,stats["con"]))/2 )
+
     to_print = ""
 #    to_print +=  "{}\n".format( header() )
 #    to_print += '\n'
     to_print += center_format("{} the {} {}".format( character_name(), personality(), occupation() )) + '\n'
     to_print += "================================\n"
-    to_print += "STR:{0: >2}   WIS:{1: >2}\n".format( roll_3d6(), roll_3d6() )
-    to_print += "DEX:{0: >2}   INT:{1: >2}\n".format( roll_3d6(), roll_3d6() )
-    to_print += "CHA:{0: >2}   CON:{1: >2}\n".format( roll_3d6(), roll_3d6() )
+    to_print += "STR:{0: >2}   WIS:{1: >2}\n".format(stats["str"],stats["wis"] )
+    to_print += "DEX:{0: >2}   INT:{1: >2}\n".format(stats["dex"],stats["int"] )
+    to_print += "CHA:{0: >2}   CON:{1: >2}\n".format(stats["cha"],stats["con"] )
     to_print += "\n"
     to_print += "{}\n".format(print_list( roll_objects() ))
+    to_print += "HP: {}".format(hp)
     ## to_print += ("\n\n\n") # Trailing newlines moved to print_receipt.py
     print(to_print)
     
