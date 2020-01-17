@@ -67,14 +67,11 @@ def random_object():
 
 def roll_objects():
     my_items = [
-        roll_item(94,5,1),
-        roll_item(45,50,5),
+        roll_item(94, 5, 1),
+        roll_item(45,50, 5),
         roll_item(21,45,34)
         ]
-    
     random.shuffle(my_items)
-    my_items.insert(0, "{} gold".format(starting_gold()) )
-    
     return my_items
 
 def print_list( list_of_strings ):
@@ -85,11 +82,11 @@ def print_list( list_of_strings ):
         str += line
     return str
 
-def starting_gold(total = 0):
+def starting_gold():
     if random.randint(0, 9) == 0:
-        return total
+        return 0
     else:
-        return starting_gold(total +1) 
+        return 1 + starting_gold()
 
 def center_format(str, pad_character = " ", width = 32):
     if len(str) >= width:
@@ -106,12 +103,18 @@ def header():
 
 def print_character():
 
+    ### CREATE CHARACTER ###
+
     stats = {}
     stat_types = ["str","dex","cha","wis","int","con"]
     for stat in stat_types:
         stats[stat] = roll_3d6()
 
-    hp = int( (stats["con"] - 3 + random.randint(0,stats["con"]))/2 )
+    hp = stats["con"] + random.randint(0,3) - 4
+
+    items = roll_objects()
+    
+    ### PRINT CHARACTER ###
 
     to_print = ""
 #    to_print +=  "{}\n".format( header() )
@@ -122,9 +125,14 @@ def print_character():
     to_print += "DEX:{0: >2}   INT:{1: >2}\n".format(stats["dex"],stats["int"] )
     to_print += "CHA:{0: >2}   CON:{1: >2}\n".format(stats["cha"],stats["con"] )
     to_print += "\n"
-    to_print += "{}\n".format(print_list( roll_objects() ))
+    to_print += "{} gold\n".format( starting_gold() )
+    to_print += "{}\n".format(items[0])
+    to_print += "{}\n".format(items[1])
+    to_print += "{}\n".format(items[2])
     to_print += "HP: {}".format(hp)
     ## to_print += ("\n\n\n") # Trailing newlines moved to print_receipt.py
     print(to_print)
-    
-print_character()
+
+while True:
+    print_character()
+    input("")
